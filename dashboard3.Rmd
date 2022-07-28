@@ -1,0 +1,42 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+```
+### Frame 1
+
+### Frame 2
+
+### Frame 3
+
+Col 1
+-----------------------------------------------------------------------
+
+### Data set de iris
+
+```{r Data}
+knitr::kable(iris %>% sample_n(10))
+
+```
+Col 2
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r data}
+
+```
+
+### Chart C
+
+```{r}
+
+```
