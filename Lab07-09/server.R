@@ -10,39 +10,23 @@ library(dplyr)
 # on click mostrar la información del punto en una tabla. check
 # on brush mostrar todos los puntos seleccionados. check
 
+df11 <- NULL
+df22 <- NULL
+df33 <- NULL
+df44 <- NULL
+mtcars$n <- 1:nrow(mtcars)
+
 shinyServer(function(input, output) {
-  
-  output$grafica_base_r <- renderPlot({
-    plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon")
-    
-  })
-  
-  
-  output$grafica_ggplot <- renderPlot({
-    diamonds %>%
-      ggplot(aes(x=carat,y=price,color=color))+
-      geom_point()+
-      ylab("Precio")+
-      xlab("Kilates")+
-      ggtitle("Precio de Diamantes por kilate")
-  })
-  
-  
   
   output$click_data <- renderPrint({
     clk_msg <- NULL
-    dclk_msg<- NULL
     mhover_msg <- NULL
     mbrush_msg <- NULL
-    df <- matrix(ncol = 3)
-    df <- data.frame(df)
+    dclk_msg<- NULL
+    
     if(!is.null(input$clk$x) ){
-      clk_msg<-
-        paste0("click cordenada x= ", round(input$clk$x,2), 
+      clk_msg<-paste0("click cordenada x= ", round(input$clk$x,2), 
                " click coordenada y= ", round(input$clk$y,2))
-      df <- data.frame(X1 = round(input$clk$x,2),
-                       X2 = round(input$clk$x,2),
-                       X3 = "green")
       
     }
     if(!is.null(input$dclk$x) ){
@@ -65,33 +49,123 @@ shinyServer(function(input, output) {
     
   })
   
-  
-  
-  output$mtcars_tbl <- renderTable({
+  dfc <- reactive({
     df1 <- nearPoints(mtcars,input$clk,xvar='wt',yvar='mpg')
-    df2 <- brushedPoints(mtcars,input$mbrush,xvar='wt',yvar='mpg')
-    df3 <- nearPoints(mtcars,input$dclk,xvar='wt',yvar='mpg')
-    df4 <- nearPoints(mtcars,input$mhover,xvar='wt',yvar='mpg')
     
-    if(nrow(df1)!=0){
-      df1
+    if(is.null(df11)){
+      df11 <<- rbind(df11, df1)
+      return(df11[,0:11])
     } else {
-      if(nrow(df2)!=0){
-        df2
-      } else {
-        NULL
+      dfd <- df11 %>%
+        filter_all(any_vars(. %in% df1$n))
+      if(nrow(dfd)==0){
+        df11 <<- rbind(df11, df1)
       }
+      if(!is.null(input$dclk)){
+        dfcd <- nearPoints(mtcars,input$dclk,xvar='wt',yvar='mpg')
+        df11 <<- df11[!(df11$n %in% dfcd$n),]
+        return(df11[,0:11])
+      }
+      return(df11[,0:11])
     }
+    
+    
+    
+  })
+  
+  dfm <- reactive({
+    df2 <- brushedPoints(mtcars,input$mbrush,xvar='wt',yvar='mpg')
+    if(is.null(df22)){
+      df22 <<- rbind(df22, df2)
+      return(df22[,0:11])
+    } else {
+      dfd <- df22 %>%
+        filter_all(any_vars(. %in% df2$n))
+      df2 <- df2[ !(df2$n %in% dfd$n), ]
+      if(nrow(dfd)==0){
+        df22 <<- rbind(df22, df2)
+      }
+      if(!is.null(input$dclk)){
+        dfcd <- nearPoints(mtcars,input$dclk,xvar='wt',yvar='mpg')
+        df22 <<- df22[!(df22$n %in% dfcd$n),]
+        return(df22[,0:11])
+      }
+      return(df22[,0:11])
+    }
+  })
+  
+  dfh <- reactive({
+    df3 <- nearPoints(mtcars,input$mhover,xvar='wt',yvar='mpg')
+    
+    if(is.null(df33)){
+      df33 <<- rbind(df33, df3)
+      return(df33[,0:11])
+    } else {
+      dfd <- df33 %>%
+        filter_all(any_vars(. %in% df3$n))
+      if(nrow(dfd)==0){
+        df33 <<- rbind(df33, df3)
+      }
+      if(!is.null(input$dclk)){
+        dfcd <- nearPoints(mtcars,input$dclk,xvar='wt',yvar='mpg')
+        df33 <<- df33[!(df33$n %in% dfcd$n),]
+        return(df33[,0:11])
+      }
+      return(df33[,0:11])
+    }
+  })
+  
+  dfdc <- reactive({
+    df4 <- nearPoints(mtcars,input$dclk,xvar='wt',yvar='mpg')
+    
+    if(is.null(df44)){
+      df44 <<- rbind(df44, df4)
+      return(df44[,0:11])
+    } else {
+      dfd <- df44 %>%
+        filter_all(any_vars(. %in% df4$n))
+      if(nrow(dfd)==0){
+        df44 <<- rbind(df44, df4)
+      }
+      return(df44[,0:11])
+    }
+  })
+  
+  
+  #--------------------
+  
+  output$mtcars_tbl_clk <- renderTable({
+    dfc()
+  })
+  
+  output$mtcars_tbl_mbrush <- renderTable({
+    dfm()
+  })
+  
+  output$mtcars_tbl_dclk<- renderTable({
+    dfdc()
+  })
+  
+  output$mtcars_tbl_mhover<- renderTable({
+    dfh()
+  })
+  
+  dfg <- reactive({
+    plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon")
+    pc <- dfc()
+    pb <- dfm()
+    ph <- dfh()
+    pdc <- dfdc()
+    points(ph$wt, ph$mpg, col="gray", pch = 19)
+    points(pc$wt, pc$mpg, col="green", pch = 19)
+    points(pb$wt, pb$mpg, col="green", pch = 19)
     
   })
   
   
-  
-  
   output$plot_click_options <- renderPlot({
-    
-    plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon", 
-         points(mtcars$wt[1:5], mtcars$mpg[1:5], col="red", pch=16))
+    dfg()
+    #plot(mtcars$wt,mtcars$mpg, xlab = "wt", ylab="millas por galon")
   })
   
   
