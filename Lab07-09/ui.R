@@ -4,7 +4,7 @@ library(shiny)
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Graficas y mas"),
+  titlePanel("Graficas"),
   
   # Sidebar with a slider input for number of bins
   shiny::tabsetPanel(
@@ -15,12 +15,14 @@ shinyUI(fluidPage(
                         hover = 'mhover',
                         brush = 'mbrush' ),
              verbatimTextOutput("click_data"),
-             tableOutput("mtcars_tbl")
-    ),
-    tabPanel("Plot",
-             h1("Graficas en Shiny"),
-             plotOutput("grafica_base_r"),
-             plotOutput("grafica_ggplot")
+             titlePanel("Click"),
+             tableOutput("mtcars_tbl_clk"),
+             titlePanel("Doble"),
+             tableOutput("mtcars_tbl_dclk"),
+             titlePanel("Hover"),
+             tableOutput("mtcars_tbl_mhover"),
+             titlePanel("Brush"),
+             tableOutput("mtcars_tbl_mbrush")
     )
     
   )
