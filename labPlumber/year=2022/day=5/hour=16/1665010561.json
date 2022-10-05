@@ -1,0 +1,1 @@
+{"resp":{"Pclass":"1","Sex":"female","Age":"34","SibSp":"1","Parch":"3","Fare":"7","Embarked":"Q"},"query":"?Pclass=1&Sex=female&Age=34&SibSp=1&Parch=3&Fare=7&Embarked=Q","user_a":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.12.8 Chrome/69.0.3497.128 Safari/537.36"}
